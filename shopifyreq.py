@@ -5,8 +5,7 @@ import json
 import requests
 from lxml import html
 
-url = "https://mondotees.com/sitemap_products_1.xml"
-# url = "https://bottleneckgallery.com/sitemap_products_1.xml"
+url = ""
 res = requests.get(url)
 
 tree = html.fromstring(res.content)
