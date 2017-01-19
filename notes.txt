@@ -1,4 +1,39 @@
-# section = page[7]
+cd desktop/projects/shopify
+source scrapeify/bin/activate
+
+open url.com/sitemap_products_1.xml
+
+def collectLinks(): collects product links
+  if list_og == ""
+    save to list_og
+  else
+    save to list_new
+
+def compare(): compare og_list to new_list
+  if og_list == new_list
+    collectLinks()
+  else:
+    saves to array
+    for i in range(len(new_product_list)):
+      openLock() opens product location
+
+def openLoc(new_product_list[i]): opens & parses json link
+  opens new_product_list[i]
+  finds variant, title, ['image'][title]
+  optional: keyword check of title & new_product_list[i]
+
+def addCart(variant): adds the products
+  atc = url + "/cart/" + variant + ":1"
+  opens atc link
+
+checkout? y/n
+
+save to textfile
+** or database
+
+
+
+
 # parent = section.getparent()
 # print(section)
 # print(parent.tag)

@@ -1,12 +1,21 @@
 # cd desktop/projects/shopify
 # source scrapeify/bin/activate
 
-import json
 import requests
+import difflib
+import json
 from lxml import html
+import platform
+from bs4 import BeautifulSoup
+from selenium import webdriver
+import time
 
-url = ""
+site_name = ""
+homepage = "https://" + site_name + ".com"
+url = homepage + "/sitemap_products_1.xml"
 res = requests.get(url)
+
+cart_list = []
 
 tree = html.fromstring(res.content)
 
@@ -14,53 +23,59 @@ page = tree.xpath('//text()')
 title = tree.xpath('//title/text()')
 image_locs = tree.xpath('//image/loc/text()')
 product_list = tree.xpath('//url/loc/text()')
+file_og = site_name + "_og.txt"
+file_new = site_name + "_new.txt"
 
-# compare diffs to product_list1 and product_list2
-
-# print(title[0])
-# print(product_list[0])
-# print(image_locs[0])
-# print('-'*100)
-
-def scrapeLocs():
-    # prints all links from sitemap_products_1
+# collects new product links
+def collectLinks(new):
+    new_file = open(file_new, "wb")
+    print("Writing to file " + file_new + "...")
     for i in range(len(product_list)):
-        count = str(i)
-        print (count +" "+ product_list[i])
-    # differing()
+        new = product_list[i]
+        new_file.write(new + "\n")
+    new_file.close()
+    print("Finished writing")
 
-def differing():
-    # diff.py
-    # if change '+ ' then openLoc(product_loc)
+# compare og_list to new_list
 
-# opens the product page json and finds variants
-# !fix error on inventory_quantity
-def openLoc(url_loc):
-    url_pull = requests.get(url_loc)
-    parsed_json = json.loads(url_pull.text)
-    title = parsed_json['product']['title']
-    product_vars = parsed_json['product']['variants']
-    # print("variant id\ttitle\t\tinventory")
-    for i in range(len(product_vars)):
+
+# opens the product page json
+def openLoc(compare):
+    prod_count = len(compare)
+    str_count = str(prod_count)
+    for i in range(prod_count):
+        json_link = compare[i] + ".json"
+        print json_link
+        url_pull = requests.get(json_link)
+        parsed_json = json.loads(url_pull.text)
+        product_title = parsed_json['product']['title']
+        product_vars = parsed_json['product']['variants']
+    # print("variant id\tproduct_title\t\tinventory")
+        print product_title
+        findVars(product_vars, parsed_json)
+        print("-"*75 + "\n")
+
+# finds variants
+def findVars(vars, parsed_json):
+    for i in range(len(vars)):
         var_id = parsed_json['product']['variants'][i]['id']
         var_title = parsed_json['product']['variants'][i]['title']
         # var_inv = parsed_json['product']['variants'][i]['inventory_quantity']
-        print(str(var_id) + "\t" + var_title)
-        print("-"*75 + "\n")
+        str_var = str(var_id)
+        cart_url = str(addCart(str_var))
+        print cart_url + "\t" + str_var + "\t" + var_title
+        cart_list.insert(0,cart_url)
+        openBrowser(cart_list[i])
 
-def addCart():
-    cart_url = requests.get("")
-    # maybe open browser for checkouts
-    # add to cart /cart/variant:1
+def addCart(variant):
+    atc = homepage + "/cart/" + variant + ":1"
+    return atc
 
-product_loc = product_list[3660] + ".json"
+def openBrowser(checkout):
+    browser = webdriver.Chrome()
+    browser.get(checkout)
+    time.sleep(300)
 
-# scrapeLocs()
-
-# for i in range(len(title)):
-#     count = str(i)
-#     url_count = i
-#     # print (count +" "+ title[i])
-#     print (product_list[url_count])
-#     # print (image_locs[i])
-#     print('-' * 100)
+collectLinks(file_new)
+compare = compareList(file_og, file_new)
+openLoc(compare)
