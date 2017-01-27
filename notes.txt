@@ -3,11 +3,10 @@ source scrapeify/bin/activate
 
 open url.com/sitemap_products_1.xml
 
-def collectLinks(): collects product links
-  if list_og == ""
-    save to list_og
-  else
-    save to list_new
+def collectLinks(): grabs initial links then collects new links for comparison
+  fileExists(): checks if file_og exists
+    not not > initialize(): writes a list of initial links to og_file
+  opens dir & new_file > writes new link list > closes file & dir
 
 def compare(): compare og_list to new_list
   if og_list == new_list
